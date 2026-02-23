@@ -9,6 +9,70 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <!-- Left Pane: Episodes -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="PodcastGo" FontSize="24" FontWeight="Bold" Margin="16"/>
+                
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="16,0,16,12">
+                    <Button Content="Sync sample feed" Click="SyncFeed_Click" Margin="0,0,12,0"/>
+                </StackPanel>
+
+                <TextBox x:Name="SearchNotesBox" Grid.Row="2" PlaceholderText="Search notes among episodes..." Margin="16,0,16,12" TextChanged="SearchNotesBox_TextChanged"/>
+
+                <ListView x:Name="EpisodeListView" Grid.Row="3" SelectionChanged="EpisodeListView_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,8">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="Listened" Visibility="{Binding IsListenedVisibility}" Foreground="Green" FontSize="12"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <!-- Right Pane: Details & Player -->
+        <Grid Grid.Column="1" Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="DetailTitleTextBlock" FontSize="32" FontWeight="SemiBold" Text="Select an episode" TextWrapping="Wrap" />
+            
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,24">
+                <Button Content="Set / Remove Listened" Click="MarkListened_Click" Margin="0,0,12,0"/>
+                <Button Content="Mark All Previous Listened" Click="MarkPreviousListened_Click"/>
+            </StackPanel>
+
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Text="Notes" FontSize="20" Margin="0,0,0,8"/>
+                <TextBox x:Name="NotesTextBox" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="NotesTextBox_TextChanged"/>
+            </Grid>
+
+            <MediaPlayerElement x:Name="PlayerElement" Grid.Row="3" AreTransportControlsEnabled="True" Height="80" Margin="0,24,0,0" AutoPlay="True"/>
+
+        </Grid>
     </Grid>
 </Page>
