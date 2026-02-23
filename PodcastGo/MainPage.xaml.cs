@@ -10,8 +10,6 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 
 namespace PodcastGo
 {
@@ -24,22 +22,8 @@ namespace PodcastGo
         public MainPage()
         {
             this.InitializeComponent();
-            
-            // Manual field mapping because the XAML compiler in this environment is not generating partial fields
-            EpisodeListView = (ListView)this.FindName("EpisodeListView");
-            DetailTitleTextBlock = (TextBlock)this.FindName("DetailTitleTextBlock");
-            NotesTextBox = (TextBox)this.FindName("NotesTextBox");
-            PlayerElement = (MediaPlayerElement)this.FindName("PlayerElement");
-            SearchNotesBox = (TextBox)this.FindName("SearchNotesBox");
-
             EpisodeListView.ItemsSource = Episodes;
         }
-
-        private ListView EpisodeListView;
-        private TextBlock DetailTitleTextBlock;
-        private TextBox NotesTextBox;
-        private MediaPlayerElement PlayerElement;
-        private TextBox SearchNotesBox;
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -56,7 +40,7 @@ namespace PodcastGo
             foreach (var ep in allEpisodes)
             {
                 if (string.IsNullOrWhiteSpace(searchQuery) ||
-                    (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0))
+                    (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
                 {
                     Episodes.Add(ep);
                 }

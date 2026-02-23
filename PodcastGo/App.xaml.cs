@@ -23,15 +23,6 @@ namespace PodcastGo
     sealed partial class App : Application
     {
         /// <summary>
-        /// Manual entry point for UWP when XAML compiler fails to generate Program.Main
-        /// </summary>
-        [MTAThread]
-        static void Main(string[] args)
-        {
-            global::Windows.UI.Xaml.Application.Start((p) => new App());
-        }
-
-        /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>

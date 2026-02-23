@@ -140,13 +140,7 @@
       <Project>{F5E68C1C-2F3E-4B2E-8A52-7D68CA5A6FBC}</Project>
       <Name>PodcastGo.BackgroundTask</Name>
     </ProjectReference>
-    <Reference Include="Windows">
-      <HintPath>C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.15063.0\Windows.winmd</HintPath>
-      <IsWinMDFile>true</IsWinMDFile>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
