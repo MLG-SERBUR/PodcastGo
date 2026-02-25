@@ -16,9 +16,28 @@ namespace PodcastGo.Services
         {
             try
             {
-                var folder = ApplicationData.Current.LocalFolder;
-                var file = await folder.GetFileAsync(PodcastsFileName);
-                var content = await FileIO.ReadTextAsync(file);
+                var roamingFolder = ApplicationData.Current.RoamingFolder;
+                
+                // Migration: Check if file exists in RoamingFolder. If not, check LocalFolder.
+                var roamingFile = await roamingFolder.TryGetItemAsync(PodcastsFileName) as StorageFile;
+                if (roamingFile == null)
+                {
+                    var localFolder = ApplicationData.Current.LocalFolder;
+                    var localFile = await localFolder.TryGetItemAsync(PodcastsFileName) as StorageFile;
+                    if (localFile != null)
+                    {
+                        // Move the file from Local to Roaming
+                        await localFile.MoveAsync(roamingFolder, PodcastsFileName, NameCollisionOption.ReplaceExisting);
+                        roamingFile = await roamingFolder.GetFileAsync(PodcastsFileName);
+                    }
+                }
+
+                if (roamingFile == null)
+                {
+                    return new List<Podcast>();
+                }
+
+                var content = await FileIO.ReadTextAsync(roamingFile);
                 var podcasts = JsonConvert.DeserializeObject<List<Podcast>>(content);
                 return podcasts ?? new List<Podcast>();
             }
@@ -37,7 +56,7 @@ namespace PodcastGo.Services
         {
             try
             {
-                var folder = ApplicationData.Current.LocalFolder;
+                var folder = ApplicationData.Current.RoamingFolder;
                 var file = await folder.CreateFileAsync(PodcastsFileName, CreationCollisionOption.ReplaceExisting);
                 var content = JsonConvert.SerializeObject(podcasts, Formatting.Indented);
                 await FileIO.WriteTextAsync(file, content);
