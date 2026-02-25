@@ -40,7 +40,7 @@ namespace PodcastGo
             foreach (var ep in allEpisodes)
             {
                 if (string.IsNullOrWhiteSpace(searchQuery) ||
-                    (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
+                    (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     Episodes.Add(ep);
                 }
