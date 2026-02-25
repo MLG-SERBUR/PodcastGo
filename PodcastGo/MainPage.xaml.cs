@@ -16,6 +16,40 @@ namespace PodcastGo
         {
             this.InitializeComponent();
             Current = this;
+
+            Windows.UI.Core.SystemNavigationManager.GetForCurrentView().BackRequested += MainPage_BackRequested;
+            ContentFrame.Navigated += ContentFrame_Navigated;
+        }
+
+        private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+            UpdateBackButtonVisibility();
+        }
+
+        private void UpdateBackButtonVisibility()
+        {
+            var visibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
+            if (ContentFrame.CanGoBack)
+            {
+                visibility = Windows.UI.Core.AppViewBackButtonVisibility.Visible;
+            }
+            Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = visibility;
+        }
+
+        private void MainPage_BackRequested(object sender, Windows.UI.Core.BackRequestedEventArgs e)
+        {
+            if (e.Handled) return;
+
+            if (ContentFrame.Content is EpisodeListPage episodeListPage && episodeListPage.IsShowingDetails)
+            {
+                episodeListPage.ShowMasterList();
+                e.Handled = true;
+            }
+            else if (ContentFrame.CanGoBack)
+            {
+                ContentFrame.GoBack();
+                e.Handled = true;
+            }
         }
 
         private Podcast _currentPodcast;

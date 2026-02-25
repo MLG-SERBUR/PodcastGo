@@ -89,16 +89,16 @@
         <!-- Global Now Playing Bar -->
         <Border x:Name="NowPlayingBar" Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
                 Visibility="Collapsed" BorderBrush="Gray" BorderThickness="0,1,0,0" Tapped="NowPlayingBar_Tapped">
-            <Grid Padding="12,4">
+            <Grid Padding="16,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                    <TextBlock x:Name="NowPlayingTitle" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text="Now Playing" FontSize="12" Foreground="Gray"/>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock x:Name="NowPlayingTitle" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="Now Playing" FontSize="14" Foreground="Gray"/>
                 </StackPanel>
-                <MediaPlayerElement x:Name="GlobalPlayer" Grid.Column="1" AreTransportControlsEnabled="True" Width="400" Height="70" AutoPlay="True"/>
+                <MediaPlayerElement x:Name="GlobalPlayer" Grid.Column="1" AreTransportControlsEnabled="True" Width="500" Height="100" AutoPlay="True"/>
             </Grid>
         </Border>
     </Grid>

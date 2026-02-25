@@ -105,7 +105,9 @@ namespace PodcastGo
             }
         }
 
-        private void BackButton_Click(object sender, RoutedEventArgs e)
+        public bool IsShowingDetails => RootGrid.ActualWidth < 800 && DetailGrid.Visibility == Windows.UI.Xaml.Visibility.Visible && MasterColumn.Width.Value == 0;
+
+        public void ShowMasterList()
         {
             if (RootGrid.ActualWidth < 800)
             {

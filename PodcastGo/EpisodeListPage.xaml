@@ -20,7 +20,7 @@
                         <Setter Target="MasterColumn.Width" Value="*" />
                         <Setter Target="DetailColumn.Width" Value="0" />
                         <Setter Target="DetailGrid.Visibility" Value="Collapsed" />
-                        <Setter Target="BackButton.Visibility" Value="Visible" />
+
                         <Setter Target="DetailColumn.MinWidth" Value="0" />
                     </VisualState.Setters>
                 </VisualState>
@@ -80,7 +80,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Button x:Name="BackButton" Content="Back" Click="BackButton_Click" Visibility="Collapsed" Margin="0,0,0,12"/>
+
             <TextBlock x:Name="DetailTitleTextBlock" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Text="Select an episode" TextWrapping="Wrap" />
             
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,24">
