@@ -22,6 +22,11 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="RootSplitView.DisplayMode" Value="Overlay" />
+                        <Setter Target="TextColumn.Width" Value="Auto" />
+                        <Setter Target="PlayerColumn.Width" Value="*" />
+                        <Setter Target="NowPlayingGrid.Padding" Value="8,4" />
+                        <Setter Target="NowPlayingTextPanel.Visibility" Value="Collapsed" />
+                        <Setter Target="GlobalPlayer.HorizontalAlignment" Value="Stretch" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Wide">
@@ -30,6 +35,9 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="RootSplitView.DisplayMode" Value="CompactOverlay" />
+                        <Setter Target="TextColumn.Width" Value="Auto" />
+                        <Setter Target="PlayerColumn.Width" Value="*" />
+                        <Setter Target="GlobalPlayer.HorizontalAlignment" Value="Stretch" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -53,7 +61,7 @@
                             Click="HamburgerButton_Click"/>
 
                     <ListView x:Name="NavListView" Grid.Row="1" 
-                              SelectionMode="Single" SelectionChanged="NavListView_SelectionChanged">
+                               SelectionMode="Single" SelectionChanged="NavListView_SelectionChanged">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Padding" Value="0"/>
@@ -89,16 +97,16 @@
         <!-- Global Now Playing Bar -->
         <Border x:Name="NowPlayingBar" Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
                 Visibility="Collapsed" BorderBrush="Gray" BorderThickness="0,1,0,0" Tapped="NowPlayingBar_Tapped">
-            <Grid Padding="16,8">
+            <Grid x:Name="NowPlayingGrid" Padding="16,8">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition x:Name="TextColumn" Width="*"/>
+                    <ColumnDefinition x:Name="PlayerColumn" Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <StackPanel x:Name="NowPlayingTextPanel" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock x:Name="NowPlayingTitle" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                     <TextBlock Text="Now Playing" FontSize="14" Foreground="Gray"/>
                 </StackPanel>
-                <MediaPlayerElement x:Name="GlobalPlayer" Grid.Column="1" AreTransportControlsEnabled="True" Width="500" Height="100" AutoPlay="True"/>
+                <MediaPlayerElement x:Name="GlobalPlayer" Grid.Column="1" AreTransportControlsEnabled="True" Height="100" AutoPlay="True"/>
             </Grid>
         </Border>
     </Grid>

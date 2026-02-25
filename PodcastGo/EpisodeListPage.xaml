@@ -84,7 +84,7 @@
             <TextBlock x:Name="DetailTitleTextBlock" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Text="Select an episode" TextWrapping="Wrap" />
             
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,24">
-                <Button Content="Set / Remove Listened" Click="MarkListened_Click" Margin="0,0,12,0"/>
+                <Button x:Name="MarkListenedButton" Content="Mark as listened" Click="MarkListened_Click" Margin="0,0,12,0"/>
                 <Button Content="Mark All Previous Listened" Click="MarkPreviousListened_Click"/>
             </StackPanel>
 

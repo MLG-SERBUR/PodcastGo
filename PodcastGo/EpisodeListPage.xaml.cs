@@ -69,6 +69,7 @@ namespace PodcastGo
             {
                 DetailTitleTextBlock.Text = _selectedEpisode.Title;
                 NotesTextBox.Text = _selectedEpisode.Notes ?? "";
+                UpdateMarkListenedButtonText();
 
                 MainPage.Current.PlayEpisode(_podcast, _selectedEpisode);
 
@@ -86,6 +87,7 @@ namespace PodcastGo
             _selectedEpisode = episode;
             DetailTitleTextBlock.Text = _selectedEpisode.Title;
             NotesTextBox.Text = _selectedEpisode.Notes ?? "";
+            UpdateMarkListenedButtonText();
             
             // Highlight in list
             EpisodeListView.SelectedItem = _selectedEpisode;
@@ -117,11 +119,24 @@ namespace PodcastGo
             }
         }
 
+        private void UpdateMarkListenedButtonText()
+        {
+            if (_selectedEpisode != null)
+            {
+                MarkListenedButton.Content = _selectedEpisode.IsListened ? "Unmark as listened" : "Mark as listened";
+            }
+            else
+            {
+                MarkListenedButton.Content = "Mark as listened";
+            }
+        }
+
         private async void MarkListened_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedEpisode != null)
             {
                 _selectedEpisode.IsListened = !_selectedEpisode.IsListened;
+                UpdateMarkListenedButtonText();
                 await SaveChangesAsync();
                 RefreshEpisodeList(SearchNotesBox.Text);
             }
