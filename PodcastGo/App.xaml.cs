@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -70,6 +71,9 @@ namespace PodcastGo
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
+
+                // Register background task on first launch
+                this.RegisterBackgroundTask();
             }
         }
 
@@ -95,6 +99,57 @@ namespace PodcastGo
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        /// <summary>
+        /// Registers the background task for downloading episodes
+        /// </summary>
+        private async void RegisterBackgroundTask()
+        {
+            try
+            {
+                // Check if task is already registered
+                foreach (var task in BackgroundTaskRegistration.AllTasks.Values)
+                {
+                    if (task.Name == "PodcastDownloadTask")
+                    {
+                        System.Diagnostics.Debug.WriteLine("Background task already registered");
+                        return;
+                    }
+                }
+
+                // Request access to run background task
+                var access = await BackgroundExecutionManager.RequestAccessAsync();
+                if (access == BackgroundAccessStatus.Denied)
+                {
+                    System.Diagnostics.Debug.WriteLine("Background execution access denied");
+                    return;
+                }
+
+                // Create a maintenance trigger that runs every 60 minutes while device is plugged in
+                uint waitIntervalMinutes = 60;
+                MaintenanceTrigger taskTrigger = new MaintenanceTrigger(waitIntervalMinutes, false);
+
+                // Add condition: only run when internet is available
+                SystemCondition internetCondition = new SystemCondition(SystemConditionType.InternetAvailable);
+
+                // Create and register the task
+                var taskBuilder = new BackgroundTaskBuilder
+                {
+                    Name = "PodcastDownloadTask",
+                    TaskEntryPoint = "PodcastGo.BackgroundTask.DownloadTask"
+                };
+
+                taskBuilder.SetTrigger(taskTrigger);
+                taskBuilder.AddCondition(internetCondition);
+
+                var registration = taskBuilder.Register();
+                System.Diagnostics.Debug.WriteLine("Background task registered successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to register background task: {ex.Message}");
+            }
         }
     }
 }

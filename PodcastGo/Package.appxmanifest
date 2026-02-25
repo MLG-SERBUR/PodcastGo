@@ -43,7 +43,7 @@
       <Extensions>
         <Extension Category="windows.backgroundTasks" EntryPoint="PodcastGo.BackgroundTask.DownloadTask">
           <BackgroundTasks>
-            <Task Type="timer" />
+            <Task Type="systemEvent" />
           </BackgroundTasks>
         </Extension>
       </Extensions>
