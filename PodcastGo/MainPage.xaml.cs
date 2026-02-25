@@ -19,11 +19,11 @@ namespace PodcastGo
             ContentFrame.Navigate(typeof(PodcastListPage));
         }
 
-        private void MainNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void MainNavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
-            if (args.SelectedItemContainer != null)
+            if (args.InvokedItemContainer != null)
             {
-                string tag = args.SelectedItemContainer.Tag.ToString();
+                string tag = args.InvokedItemContainer.Tag.ToString();
                 switch (tag)
                 {
                     case "podcasts":

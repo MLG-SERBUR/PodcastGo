@@ -9,10 +9,31 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="Narrow">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MainNavView.PaneDisplayMode" Value="Top" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Wide">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="641" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MainNavView.PaneDisplayMode" Value="Left" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <NavigationView x:Name="MainNavView" 
                         PaneDisplayMode="Left"
                         IsSettingsVisible="False"
-                        SelectionChanged="MainNavView_SelectionChanged">
+                        ItemInvoked="MainNavView_ItemInvoked">
             <NavigationView.MenuItems>
                 <NavigationViewItem Icon="List" Content="My Podcasts" Tag="podcasts" />
                 <NavigationViewItem Icon="Add" Content="Add Podcast" Tag="add" />

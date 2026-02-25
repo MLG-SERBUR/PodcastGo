@@ -77,12 +77,29 @@ namespace PodcastGo
                     PlayerElement.MediaPlayer.Play();
                     TileService.UpdateLiveTile(_selectedEpisode.Title);
                 }
+
+                if (RootGrid.ActualWidth < 641)
+                {
+                    MasterColumn.Width = new GridLength(0);
+                    DetailColumn.Width = new GridLength(1, GridUnitType.Star);
+                    DetailGrid.Visibility = Visibility.Visible;
+                }
             }
             else
             {
                 DetailTitleTextBlock.Text = "Select an episode";
                 NotesTextBox.Text = "";
                 PlayerElement.Source = null;
+            }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (RootGrid.ActualWidth < 641)
+            {
+                MasterColumn.Width = new GridLength(1, GridUnitType.Star);
+                DetailColumn.Width = new GridLength(0);
+                DetailGrid.Visibility = Visibility.Collapsed;
             }
         }
 

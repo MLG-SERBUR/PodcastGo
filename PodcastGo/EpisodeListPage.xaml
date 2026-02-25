@@ -9,10 +9,36 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid x:Name="RootGrid">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="Narrow">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MasterColumn.Width" Value="*" />
+                        <Setter Target="DetailColumn.Width" Value="0" />
+                        <Setter Target="DetailGrid.Visibility" Value="Collapsed" />
+                        <Setter Target="BackButton.Visibility" Value="Visible" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Wide">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="641" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MasterColumn.Width" Value="350" />
+                        <Setter Target="DetailColumn.Width" Value="*" />
+                        <Setter Target="DetailGrid.Visibility" Value="Visible" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="350"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition x:Name="MasterColumn" Width="350"/>
+            <ColumnDefinition x:Name="DetailColumn" Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Left Pane: Episodes -->
@@ -45,22 +71,24 @@
         </Border>
 
         <!-- Right Pane: Details & Player -->
-        <Grid Grid.Column="1" Margin="24">
+        <Grid x:Name="DetailGrid" Grid.Column="1" Margin="24">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock x:Name="DetailTitleTextBlock" FontSize="32" FontWeight="SemiBold" Text="Select an episode" TextWrapping="Wrap" />
+            <Button x:Name="BackButton" Content="Back" Click="BackButton_Click" Visibility="Collapsed" Margin="0,0,0,12"/>
+            <TextBlock x:Name="DetailTitleTextBlock" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Text="Select an episode" TextWrapping="Wrap" />
             
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,24">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,24">
                 <Button Content="Set / Remove Listened" Click="MarkListened_Click" Margin="0,0,12,0"/>
                 <Button Content="Mark All Previous Listened" Click="MarkPreviousListened_Click"/>
             </StackPanel>
 
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -70,7 +98,7 @@
                 <TextBox x:Name="NotesTextBox" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="NotesTextBox_TextChanged"/>
             </Grid>
 
-            <MediaPlayerElement x:Name="PlayerElement" Grid.Row="3" AreTransportControlsEnabled="True" Height="80" Margin="0,24,0,0" AutoPlay="True"/>
+            <MediaPlayerElement x:Name="PlayerElement" Grid.Row="4" AreTransportControlsEnabled="True" Height="80" Margin="0,24,0,0" AutoPlay="True"/>
         </Grid>
     </Grid>
 </Page>
