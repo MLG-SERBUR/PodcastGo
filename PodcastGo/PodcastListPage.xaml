@@ -40,6 +40,7 @@
                     <StackPanel Margin="12" RightTapped="PodcastItem_RightTapped" Background="Transparent">
                         <FlyoutBase.AttachedFlyout>
                             <MenuFlyout>
+                                <MenuFlyoutItem Text="Pin to Start" Click="PinPodcast_Click" Tag="{Binding}"/>
                                 <MenuFlyoutItem Text="Delete" Click="DeletePodcast_Click" Tag="{Binding}"/>
                             </MenuFlyout>
                         </FlyoutBase.AttachedFlyout>

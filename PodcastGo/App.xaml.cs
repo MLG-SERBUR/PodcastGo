@@ -69,10 +69,16 @@ namespace PodcastGo
                     // parameter
                     rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
-                // Ensure the current window is active
-                Window.Current.Activate();
+                else
+                {
+                    // If the app is already running, pass launch args directly to the MainPage
+                    if (rootFrame.Content is MainPage mainPage && !string.IsNullOrEmpty(e.Arguments))
+                    {
+                        mainPage.HandleLaunchArguments(e.Arguments);
+                    }
+                }
 
-                // Register background task on first launch
+                Window.Current.Activate();
                 this.RegisterBackgroundTask();
             }
         }

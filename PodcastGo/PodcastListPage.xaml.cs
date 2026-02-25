@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using PodcastGo.Models;
 using PodcastGo.Services;
 using Windows.UI.Xaml.Controls;
@@ -44,23 +46,57 @@ namespace PodcastGo
             }
         }
 
+        private async void PinPodcast_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var menuFlyoutItem = sender as MenuFlyoutItem;
+            var podcast = menuFlyoutItem?.Tag as Podcast ?? menuFlyoutItem?.DataContext as Podcast;
+
+            if (podcast != null)
+            {
+                // Tiles IDs must be alphanumeric
+                string safeId = new string((podcast.Id ?? podcast.RssUrl ?? "").Where(c => char.IsLetterOrDigit(c)).ToArray());
+                string tileId = $"Podcast_{safeId}";
+
+                if (!Windows.UI.StartScreen.SecondaryTile.Exists(tileId))
+                {
+                    var secondaryTile = new Windows.UI.StartScreen.SecondaryTile(
+                        tileId,
+                        podcast.Title,
+                        $"podcastId={podcast.Id}",
+                        new Uri("ms-appx:///Assets/Square150x150Logo.png"),
+                        Windows.UI.StartScreen.TileSize.Default);
+
+                    secondaryTile.VisualElements.ShowNameOnSquare150x150Logo = true;
+
+                    bool isPinned = await secondaryTile.RequestCreateAsync();
+                    if (isPinned)
+                    {
+                        // Update it immediately with current status once pinned
+                        _ = Services.TileService.UpdatePodcastTileAsync(podcast, null);
+                    }
+                }
+            }
+        }
+
         private async void DeletePodcast_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var menuFlyoutItem = sender as MenuFlyoutItem;
-            if (menuFlyoutItem != null)
-            {
-                // The Tag is now bound to the whole Podcast object
-                var podcast = menuFlyoutItem.Tag as Podcast;
-                
-                // Fallback to DataContext if Tag is somehow null
-                if (podcast == null)
-                {
-                    podcast = menuFlyoutItem.DataContext as Podcast;
-                }
+            var podcast = menuFlyoutItem?.Tag as Podcast ?? menuFlyoutItem?.DataContext as Podcast;
 
-                if (podcast != null)
+            if (podcast != null)
+            {
+                var dialog = new ContentDialog
                 {
-                    // Use Id if available, fallback to RssUrl
+                    Title = "Delete Podcast",
+                    Content = $"Are you sure you want to delete '{podcast.Title}'? This will remove all downloaded episodes.",
+                    PrimaryButtonText = "Delete",
+                    CloseButtonText = "Cancel"
+                };
+
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
+                {
                     string identifier = podcast.Id ?? podcast.RssUrl;
                     if (!string.IsNullOrEmpty(identifier))
                     {

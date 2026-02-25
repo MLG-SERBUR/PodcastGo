@@ -77,53 +77,37 @@ namespace PodcastGo
 
             Uri uri = new Uri(url);
 
-            // Resume logic: check if same URI is already loaded
+            // Resume logic
             if (GlobalPlayer.Source is MediaSource oldSource && oldSource.Uri == uri)
             {
                 if (GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackState != Windows.Media.Playback.MediaPlaybackState.Playing)
                 {
                     GlobalPlayer.MediaPlayer.Play();
                 }
-                System.Diagnostics.Debug.WriteLine($"[PLAYBACK] Resumed episode: {episode.Title}, Position: {GlobalPlayer.MediaPlayer.PlaybackSession.Position.TotalSeconds}s");
                 return;
             }
 
             NowPlayingTitle.Text = episode.Title;
             NowPlayingBar.Visibility = Windows.UI.Xaml.Visibility.Visible;
 
-            System.Diagnostics.Debug.WriteLine($"[PLAYBACK] Loading episode: {episode.Title}, SavedPosition: {episode.Position.TotalSeconds}s");
-
-            // Create new media source and set it
             var mediaSource = MediaSource.CreateFromUri(uri);
 
-            // Handle media opened event to restore position
             mediaSource.OpenOperationCompleted += (sender, args) =>
             {
                 _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
                     try
                     {
-                        // Restore playback position, backing up 2 seconds for context
                         if (episode.Position.TotalSeconds > 3)
                         {
-                            var targetPos = episode.Position.Subtract(TimeSpan.FromSeconds(2));
-                            GlobalPlayer.MediaPlayer.PlaybackSession.Position = targetPos;
-                            System.Diagnostics.Debug.WriteLine($"[PLAYBACK] Restored position to {targetPos.TotalSeconds}s (2s before saved)");
+                            GlobalPlayer.MediaPlayer.PlaybackSession.Position = episode.Position.Subtract(TimeSpan.FromSeconds(2));
                         }
                         else if (episode.Position.TotalSeconds > 0)
                         {
                             GlobalPlayer.MediaPlayer.PlaybackSession.Position = TimeSpan.Zero;
-                            System.Diagnostics.Debug.WriteLine($"[PLAYBACK] Episode near start, starting from beginning");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"[PLAYBACK] No saved position, starting from beginning");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[PLAYBACK] Error restoring position: {ex.Message}");
-                    }
+                    catch { }
                 });
             };
 
@@ -131,13 +115,13 @@ namespace PodcastGo
             GlobalPlayer.MediaPlayer.Play();
             episode.LastPlayedTime = DateTimeOffset.Now;
 
-            // Stop multiple subscriptions to prevent memory leak/multi-save execution
             GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackStateChanged -= PlaybackSession_PlaybackStateChanged;
             GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackStateChanged += PlaybackSession_PlaybackStateChanged;
 
             _saveTimer.Start();
 
-            Services.TileService.UpdateLiveTile(episode.Title);
+            // Update both main live tile and specific secondary tile
+            _ = Services.TileService.UpdatePodcastTileAsync(podcast, episode);
         }
 
         private void PlaybackSession_PlaybackStateChanged(Windows.Media.Playback.MediaPlaybackSession sender, object args)
@@ -223,8 +207,52 @@ namespace PodcastGo
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            NavListView.SelectedIndex = 0;
-            ContentFrame.Navigate(typeof(PodcastListPage));
+
+            // Only navigate to PodcastListPage if the frame is completely empty
+            if (ContentFrame.Content == null)
+            {
+                NavListView.SelectedIndex = 0;
+                ContentFrame.Navigate(typeof(PodcastListPage));
+            }
+
+            // Catch parameters if launched from Start Menu secondary tile
+            if (e.Parameter is string args && !string.IsNullOrEmpty(args))
+            {
+                HandleLaunchArguments(args);
+            }
+        }
+
+        public async void HandleLaunchArguments(string args)
+        {
+            if (args.StartsWith("podcastId="))
+            {
+                string podcastId = args.Substring(10);
+                var podcasts = await StorageService.LoadPodcastsAsync();
+                var podcast = podcasts.FirstOrDefault(p => p.Id == podcastId);
+
+                if (podcast != null)
+                {
+                    // Find the oldest unlistened episode
+                    var oldestUnlistened = podcast.Episodes
+                        .Where(ep => !ep.IsListened)
+                        .OrderBy(ep => ep.PublishDate)
+                        .FirstOrDefault();
+
+                    if (oldestUnlistened != null)
+                    {
+                        PlayEpisode(podcast, oldestUnlistened);
+                    }
+                    else
+                    {
+                        // Fallback: just play the newest episode if user is entirely caught up
+                        var newest = podcast.Episodes.OrderByDescending(ep => ep.PublishDate).FirstOrDefault();
+                        if (newest != null)
+                        {
+                            PlayEpisode(podcast, newest);
+                        }
+                    }
+                }
+            }
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)
