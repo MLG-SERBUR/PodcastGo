@@ -47,5 +47,23 @@ namespace PodcastGo.Services
                 System.Diagnostics.Debug.WriteLine($"Failed to save podcasts: {ex.Message}");
             }
         }
+
+        public static async Task DeletePodcastAsync(string podcastId)
+        {
+            var podcasts = await LoadPodcastsAsync();
+            var podcastToRemove = podcasts.Find(p => p.Id == podcastId);
+            
+            // Fallback: search by ID or title/url if ID is missing (for older data)
+            if (podcastToRemove == null && !string.IsNullOrEmpty(podcastId))
+            {
+                podcastToRemove = podcasts.Find(p => p.RssUrl == podcastId || p.Title == podcastId);
+            }
+
+            if (podcastToRemove != null)
+            {
+                podcasts.Remove(podcastToRemove);
+                await SavePodcastsAsync(podcasts);
+            }
+        }
     }
 }

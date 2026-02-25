@@ -37,7 +37,12 @@
         <GridView x:Name="PodcastGridView" Grid.Row="1" SelectionMode="Single" ItemClick="PodcastGridView_ItemClick" IsItemClickEnabled="True">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="models:Podcast">
-                    <StackPanel Margin="12">
+                    <StackPanel Margin="12" RightTapped="PodcastItem_RightTapped" Background="Transparent">
+                        <FlyoutBase.AttachedFlyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="Delete" Click="DeletePodcast_Click" Tag="{Binding}"/>
+                            </MenuFlyout>
+                        </FlyoutBase.AttachedFlyout>
                         <Border Width="180" Height="180" Background="LightGray">
                             <SymbolIcon Symbol="Audio" Foreground="Gray"/>
                         </Border>
