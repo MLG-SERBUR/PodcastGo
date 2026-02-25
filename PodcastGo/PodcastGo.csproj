@@ -128,6 +128,15 @@
     <Compile Include="Services\StorageService.cs" />
     <Compile Include="Services\PodcastService.cs" />
     <Compile Include="Services\TileService.cs" />
+    <Compile Include="AddPodcastPage.xaml.cs">
+      <DependentUpon>AddPodcastPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PodcastListPage.xaml.cs">
+      <DependentUpon>PodcastListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EpisodeListPage.xaml.cs">
+      <DependentUpon>EpisodeListPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -151,6 +160,18 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddPodcastPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PodcastListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EpisodeListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

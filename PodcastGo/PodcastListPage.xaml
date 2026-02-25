@@ -1,0 +1,33 @@
+<Page
+    x:Class="PodcastGo.PodcastListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PodcastGo"
+    xmlns:models="using:PodcastGo.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="My Podcasts" FontSize="32" FontWeight="SemiBold" Margin="0,0,0,24"/>
+
+        <GridView x:Name="PodcastGridView" Grid.Row="1" SelectionMode="Single" ItemClick="PodcastGridView_ItemClick" IsItemClickEnabled="True">
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="models:Podcast">
+                    <StackPanel Width="200" Margin="12">
+                        <Border Width="180" Height="180" Background="LightGray">
+                            <SymbolIcon Symbol="Audio" Foreground="Gray"/>
+                        </Border>
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Margin="0,8,0,0" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
+</Page>
