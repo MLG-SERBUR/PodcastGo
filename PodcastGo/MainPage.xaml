@@ -9,6 +9,11 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState x:Name="Narrow">
@@ -16,30 +21,85 @@
                         <AdaptiveTrigger MinWindowWidth="0" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="MainNavView.PaneDisplayMode" Value="Top" />
+                        <Setter Target="RootSplitView.DisplayMode" Value="Overlay" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Wide">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="641" />
+                        <AdaptiveTrigger MinWindowWidth="800" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="MainNavView.PaneDisplayMode" Value="Left" />
+                        <Setter Target="RootSplitView.DisplayMode" Value="CompactOverlay" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
-        <NavigationView x:Name="MainNavView" 
-                        PaneDisplayMode="Left"
-                        IsSettingsVisible="False"
-                        ItemInvoked="MainNavView_ItemInvoked">
-            <NavigationView.MenuItems>
-                <NavigationViewItem Icon="List" Content="My Podcasts" Tag="podcasts" />
-                <NavigationViewItem Icon="Add" Content="Add Podcast" Tag="add" />
-            </NavigationView.MenuItems>
+        <SplitView x:Name="RootSplitView"
+                   DisplayMode="CompactOverlay"
+                   OpenPaneLength="240"
+                   CompactPaneLength="48"
+                   IsPaneOpen="False">
+            <SplitView.Pane>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <Frame x:Name="ContentFrame" />
-        </NavigationView>
+                    <Button x:Name="HamburgerButton"
+                            FontFamily="Segoe MDL2 Assets" Content="&#xE700;"
+                            Width="48" Height="48" Background="Transparent"
+                            Click="HamburgerButton_Click"/>
+
+                    <ListView x:Name="NavListView" Grid.Row="1" 
+                              SelectionMode="Single" SelectionChanged="NavListView_SelectionChanged">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="MinWidth" Value="48"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListViewItem Tag="podcasts">
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Width="48" Height="48">
+                                    <SymbolIcon Symbol="List"/>
+                                </Grid>
+                                <TextBlock Text="My Podcasts" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="add">
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Width="48" Height="48">
+                                    <SymbolIcon Symbol="Add"/>
+                                </Grid>
+                                <TextBlock Text="Add Podcast" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </ListViewItem>
+                    </ListView>
+                </Grid>
+            </SplitView.Pane>
+
+            <SplitView.Content>
+                <Frame x:Name="ContentFrame" />
+            </SplitView.Content>
+        </SplitView>
+
+        <!-- Global Now Playing Bar -->
+        <Border x:Name="NowPlayingBar" Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                Visibility="Collapsed" BorderBrush="Gray" BorderThickness="0,1,0,0" Tapped="NowPlayingBar_Tapped">
+            <Grid Padding="12,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock x:Name="NowPlayingTitle" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="Now Playing" FontSize="12" Foreground="Gray"/>
+                </StackPanel>
+                <MediaPlayerElement x:Name="GlobalPlayer" Grid.Column="1" AreTransportControlsEnabled="True" Width="400" Height="70" AutoPlay="True"/>
+            </Grid>
+        </Border>
     </Grid>
 </Page>

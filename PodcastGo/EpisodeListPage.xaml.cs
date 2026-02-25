@@ -13,6 +13,7 @@ namespace PodcastGo
     public sealed partial class EpisodeListPage : Page
     {
         private Podcast _podcast;
+        public Podcast CurrentPodcast => _podcast;
         public ObservableCollection<Episode> Episodes { get; } = new ObservableCollection<Episode>();
         private Episode _selectedEpisode;
         private bool _showAll = false;
@@ -31,6 +32,12 @@ namespace PodcastGo
             {
                 PodcastTitleTextBlock.Text = _podcast.Title;
                 RefreshEpisodeList();
+
+                // Auto-select playing episode if it belongs to this podcast
+                if (MainPage.Current.PlayingPodcast == _podcast && MainPage.Current.PlayingEpisode != null)
+                {
+                    ShowEpisodeDetails(MainPage.Current.PlayingEpisode);
+                }
             }
         }
 
@@ -55,51 +62,56 @@ namespace PodcastGo
             }
         }
 
-        private void EpisodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void EpisodeListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            _selectedEpisode = EpisodeListView.SelectedItem as Episode;
+            _selectedEpisode = e.ClickedItem as Episode;
             if (_selectedEpisode != null)
             {
                 DetailTitleTextBlock.Text = _selectedEpisode.Title;
                 NotesTextBox.Text = _selectedEpisode.Notes ?? "";
 
-                if (!string.IsNullOrEmpty(_selectedEpisode.LocalFilePath))
-                {
-                    PlayerElement.Source = MediaSource.CreateFromUri(new Uri(_selectedEpisode.LocalFilePath));
-                }
-                else if (!string.IsNullOrEmpty(_selectedEpisode.AudioUrl))
-                {
-                    PlayerElement.Source = MediaSource.CreateFromUri(new Uri(_selectedEpisode.AudioUrl));
-                }
+                MainPage.Current.PlayEpisode(_podcast, _selectedEpisode);
 
-                if (PlayerElement.MediaPlayer != null)
-                {
-                    PlayerElement.MediaPlayer.Play();
-                    TileService.UpdateLiveTile(_selectedEpisode.Title);
-                }
-
-                if (RootGrid.ActualWidth < 641)
+                if (RootGrid.ActualWidth < 800)
                 {
                     MasterColumn.Width = new GridLength(0);
                     DetailColumn.Width = new GridLength(1, GridUnitType.Star);
-                    DetailGrid.Visibility = Visibility.Visible;
+                    DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
                 }
+            }
+        }
+
+        public void ShowEpisodeDetails(Episode episode)
+        {
+            _selectedEpisode = episode;
+            DetailTitleTextBlock.Text = _selectedEpisode.Title;
+            NotesTextBox.Text = _selectedEpisode.Notes ?? "";
+            
+            // Highlight in list
+            EpisodeListView.SelectedItem = _selectedEpisode;
+            EpisodeListView.ScrollIntoView(_selectedEpisode);
+
+            if (RootGrid.ActualWidth < 800)
+            {
+                MasterColumn.Width = new GridLength(0);
+                DetailColumn.Width = new GridLength(1, GridUnitType.Star);
+                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
             else
             {
-                DetailTitleTextBlock.Text = "Select an episode";
-                NotesTextBox.Text = "";
-                PlayerElement.Source = null;
+                MasterColumn.Width = new GridLength(400);
+                DetailColumn.Width = new GridLength(1, GridUnitType.Star);
+                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            if (RootGrid.ActualWidth < 641)
+            if (RootGrid.ActualWidth < 800)
             {
                 MasterColumn.Width = new GridLength(1, GridUnitType.Star);
                 DetailColumn.Width = new GridLength(0);
-                DetailGrid.Visibility = Visibility.Collapsed;
+                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
         }
 

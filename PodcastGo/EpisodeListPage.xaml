@@ -21,14 +21,15 @@
                         <Setter Target="DetailColumn.Width" Value="0" />
                         <Setter Target="DetailGrid.Visibility" Value="Collapsed" />
                         <Setter Target="BackButton.Visibility" Value="Visible" />
+                        <Setter Target="DetailColumn.MinWidth" Value="0" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Wide">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="641" />
+                        <AdaptiveTrigger MinWindowWidth="800" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="MasterColumn.Width" Value="350" />
+                        <Setter Target="MasterColumn.Width" Value="400" />
                         <Setter Target="DetailColumn.Width" Value="*" />
                         <Setter Target="DetailGrid.Visibility" Value="Visible" />
                     </VisualState.Setters>
@@ -37,12 +38,12 @@
         </VisualStateManager.VisualStateGroups>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="MasterColumn" Width="350"/>
-            <ColumnDefinition x:Name="DetailColumn" Width="*"/>
+            <ColumnDefinition x:Name="MasterColumn" Width="400"/>
+            <ColumnDefinition x:Name="DetailColumn" Width="*" MinWidth="400"/>
         </Grid.ColumnDefinitions>
 
         <!-- Left Pane: Episodes -->
-        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+        <Border x:Name="MasterPane" Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -56,7 +57,7 @@
                     <CheckBox x:Name="ShowAllCheckBox" Content="Show all episodes" Checked="ShowAll_Changed" Unchecked="ShowAll_Changed"/>
                 </StackPanel>
 
-                <ListView x:Name="EpisodeListView" Grid.Row="2" SelectionChanged="EpisodeListView_SelectionChanged">
+                <ListView x:Name="EpisodeListView" Grid.Row="2" ItemClick="EpisodeListView_ItemClick" IsItemClickEnabled="True">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:Episode">
                             <StackPanel Margin="0,8">
@@ -70,14 +71,13 @@
             </Grid>
         </Border>
 
-        <!-- Right Pane: Details & Player -->
+        <!-- Right Pane: Details -->
         <Grid x:Name="DetailGrid" Grid.Column="1" Margin="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Button x:Name="BackButton" Content="Back" Click="BackButton_Click" Visibility="Collapsed" Margin="0,0,0,12"/>
@@ -97,8 +97,6 @@
                 <TextBlock Text="Notes" FontSize="20" Margin="0,0,0,8"/>
                 <TextBox x:Name="NotesTextBox" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="NotesTextBox_TextChanged"/>
             </Grid>
-
-            <MediaPlayerElement x:Name="PlayerElement" Grid.Row="4" AreTransportControlsEnabled="True" Height="80" Margin="0,24,0,0" AutoPlay="True"/>
         </Grid>
     </Grid>
 </Page>
