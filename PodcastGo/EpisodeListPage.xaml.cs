@@ -15,6 +15,7 @@ namespace PodcastGo
         private Podcast _podcast;
         public ObservableCollection<Episode> Episodes { get; } = new ObservableCollection<Episode>();
         private Episode _selectedEpisode;
+        private bool _showAll = false;
 
         public EpisodeListPage()
         {
@@ -38,12 +39,16 @@ namespace PodcastGo
             Episodes.Clear();
             if (_podcast == null) return;
 
-            var filtered = _podcast.Episodes.OrderByDescending(ep => ep.PublishDate);
-            
-            foreach (var ep in filtered)
+            var allSorted = _podcast.Episodes.OrderByDescending(ep => ep.PublishDate).ToList();
+            Episode nextUnlistened = allSorted.Where(ep => !ep.IsListened).OrderBy(ep => ep.PublishDate).FirstOrDefault();
+
+            foreach (var ep in allSorted)
             {
-                if (string.IsNullOrWhiteSpace(searchQuery) ||
-                    (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0))
+                bool matchesFilter = _showAll || ep.IsListened || ep == nextUnlistened;
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchQuery) ||
+                                     (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                if (matchesFilter && matchesSearch)
                 {
                     Episodes.Add(ep);
                 }
@@ -87,6 +92,7 @@ namespace PodcastGo
             {
                 _selectedEpisode.IsListened = !_selectedEpisode.IsListened;
                 await SaveChangesAsync();
+                RefreshEpisodeList(SearchNotesBox.Text);
             }
         }
 
@@ -103,6 +109,7 @@ namespace PodcastGo
                         allEpisodes[i].IsListened = true;
                     }
                     await SaveChangesAsync();
+                    RefreshEpisodeList(SearchNotesBox.Text);
                 }
             }
         }
@@ -119,6 +126,15 @@ namespace PodcastGo
         private void SearchNotesBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             RefreshEpisodeList(SearchNotesBox.Text);
+        }
+
+        private void ShowAll_Changed(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox cb)
+            {
+                _showAll = cb.IsChecked ?? false;
+                RefreshEpisodeList(SearchNotesBox.Text);
+            }
         }
 
         private async System.Threading.Tasks.Task SaveChangesAsync()

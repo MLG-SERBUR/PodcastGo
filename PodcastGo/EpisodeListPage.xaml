@@ -25,7 +25,10 @@
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="PodcastTitleTextBlock" FontSize="24" FontWeight="Bold" Margin="16" TextWrapping="Wrap"/>
                 
-                <TextBox x:Name="SearchNotesBox" Grid.Row="1" PlaceholderText="Search notes..." Margin="16,0,16,12" TextChanged="SearchNotesBox_TextChanged"/>
+                <StackPanel Grid.Row="1" Margin="16,0,16,12">
+                    <TextBox x:Name="SearchNotesBox" PlaceholderText="Search notes..." Margin="0,0,0,8" TextChanged="SearchNotesBox_TextChanged"/>
+                    <CheckBox x:Name="ShowAllCheckBox" Content="Show all episodes" Checked="ShowAll_Changed" Unchecked="ShowAll_Changed"/>
+                </StackPanel>
 
                 <ListView x:Name="EpisodeListView" Grid.Row="2" SelectionChanged="EpisodeListView_SelectionChanged">
                     <ListView.ItemTemplate>
