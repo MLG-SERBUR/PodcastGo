@@ -43,6 +43,7 @@ namespace PodcastGo.Models
         public DateTimeOffset PublishDate { get; set; }
         public int DurationSeconds { get; set; }
         public TimeSpan Position { get; set; }
+        public DateTimeOffset? LastPlayedTime { get; set; }
 
         public string IsListenedVisibility => IsListened ? "Visible" : "Collapsed";
 

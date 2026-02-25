@@ -84,5 +84,30 @@ namespace PodcastGo.Services
                 await SavePodcastsAsync(podcasts);
             }
         }
+
+        public static async Task<string> GetBackgroundTaskLogAsync()
+        {
+            try
+            {
+                var folder = ApplicationData.Current.RoamingFolder;
+                var file = await folder.GetFileAsync("background_task_log.txt");
+                return await FileIO.ReadTextAsync(file);
+            }
+            catch
+            {
+                return "No background task log yet. The background task will log here when it runs.\n\nMake sure:\n- The app was launched at least once (to register the task)\n- Device is plugged in\n- Device has internet connection\n- ~24 hours have passed since last run (or you can force a test in the Debug page)";
+            }
+        }
+
+        public static async Task ClearBackgroundTaskLogAsync()
+        {
+            try
+            {
+                var folder = ApplicationData.Current.RoamingFolder;
+                var file = await folder.GetFileAsync("background_task_log.txt");
+                await file.DeleteAsync();
+            }
+            catch { }
+        }
     }
 }

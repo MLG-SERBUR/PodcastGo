@@ -137,6 +137,9 @@
     <Compile Include="EpisodeListPage.xaml.cs">
       <DependentUpon>EpisodeListPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DebugPage.xaml.cs">
+      <DependentUpon>DebugPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -172,6 +175,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="EpisodeListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DebugPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

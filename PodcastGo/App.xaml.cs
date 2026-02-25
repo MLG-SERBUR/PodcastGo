@@ -126,8 +126,8 @@ namespace PodcastGo
                     return;
                 }
 
-                // Create a maintenance trigger that runs every 60 minutes while device is plugged in
-                uint waitIntervalMinutes = 60;
+                // Create a maintenance trigger that runs daily (1440 minutes) while device is plugged in
+                uint waitIntervalMinutes = 1440;
                 MaintenanceTrigger taskTrigger = new MaintenanceTrigger(waitIntervalMinutes, false);
 
                 // Add condition: only run when internet is available

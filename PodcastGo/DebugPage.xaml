@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="PodcastGo.DebugPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PodcastGo"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Padding="16">
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+                <TextBlock Text="Debug Information" FontSize="24" FontWeight="Bold"/>
+
+                <!-- Background Task Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Background Task" FontSize="18" FontWeight="SemiBold" Foreground="CornflowerBlue"/>
+                    <TextBox x:Name="BackgroundTaskStatus" IsReadOnly="True" MinHeight="100" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"/>
+                    <Button Content="Refresh Background Task Info" Click="RefreshBackgroundTaskInfo_Click" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <!-- Background Task Log Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Background Task Execution Log" FontSize="18" FontWeight="SemiBold" Foreground="DarkCyan"/>
+                    <TextBox x:Name="BackgroundTaskLog" IsReadOnly="True" MinHeight="120" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Refresh Task Log" Click="RefreshBackgroundTaskLog_Click" Width="150" HorizontalAlignment="Left"/>
+                        <Button Content="Clear Log" Click="ClearBackgroundTaskLog_Click" Background="Orange" Width="100" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Playback Position Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Playback Position" FontSize="18" FontWeight="SemiBold" Foreground="SeaGreen"/>
+                    <TextBox x:Name="PlaybackPositionStatus" IsReadOnly="True" MinHeight="100" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"/>
+                    <Button Content="Refresh Playback Info" Click="RefreshPlaybackInfo_Click" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <!-- Current Episode Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Currently Playing" FontSize="18" FontWeight="SemiBold" Foreground="DarkOrange"/>
+                    <TextBox x:Name="CurrentEpisodeStatus" IsReadOnly="True" MinHeight="80" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"/>
+                </StackPanel>
+
+                <!-- Actions Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Actions" FontSize="18" FontWeight="SemiBold" Foreground="Purple"/>
+                    <StackPanel Spacing="8">
+                        <Button Content="Clear All Saved Positions" Click="ClearPositions_Click" Background="Orange"/>
+                        <Button Content="Trigger Background Task Now" Click="TriggerBackgroundTask_Click" Background="CornflowerBlue" Foreground="White"/>
+                        <Button Content="Copy Debug Log" Click="CopyDebugLog_Click"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Full Debug Log -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Full Debug Log" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBox x:Name="DebugLog" IsReadOnly="True" MinHeight="200" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
