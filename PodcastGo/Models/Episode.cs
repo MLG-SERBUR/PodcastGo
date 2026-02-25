@@ -46,6 +46,10 @@ namespace PodcastGo.Models
 
         public string IsListenedVisibility => IsListened ? "Visible" : "Collapsed";
 
+        public bool IsDownloaded => !string.IsNullOrEmpty(LocalFilePath);
+        public string IsDownloadedVisibility => IsDownloaded ? "Visible" : "Collapsed";
+
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

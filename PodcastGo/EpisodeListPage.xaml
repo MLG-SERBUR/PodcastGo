@@ -60,11 +60,19 @@
                 <ListView x:Name="EpisodeListView" Grid.Row="2" ItemClick="EpisodeListView_ItemClick" IsItemClickEnabled="True">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:Episode">
-                            <StackPanel Margin="0,8">
-                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Text="Listened" Visibility="{Binding IsListenedVisibility}" Foreground="Green" FontSize="12"/>
-                            </StackPanel>
+                            <Grid Margin="0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="Listened" Visibility="{Binding IsListenedVisibility}" Foreground="Green" FontSize="12"/>
+                                </StackPanel>
+                                <SymbolIcon Grid.Column="1" Symbol="Download" Visibility="{Binding IsDownloadedVisibility}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{ThemeResource SystemControlForegroundAccentBrush}"/>
+                            </Grid>
+
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
