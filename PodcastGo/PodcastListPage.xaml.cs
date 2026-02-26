@@ -68,11 +68,31 @@ namespace PodcastGo
 
                     secondaryTile.VisualElements.ShowNameOnSquare150x150Logo = true;
 
-                    bool isPinned = await secondaryTile.RequestCreateAsync();
-                    if (isPinned)
+                    try
                     {
-                        // Update it immediately with current status once pinned
-                        _ = Services.TileService.UpdatePodcastTileAsync(podcast, null);
+                        // This line attempts to show a system dialog. 
+                        // If the Shell (Start Menu) is modified/broken (ExplorerPatcher), this throws 0x80070490.
+                        bool isPinned = await secondaryTile.RequestCreateAsync();
+
+                        if (isPinned)
+                        {
+                            // Only try to update the tile if the pin was actually successful
+                            await Services.TileService.UpdatePodcastTileAsync(podcast, null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error for debugging
+                        System.Diagnostics.Debug.WriteLine($"Pinning failed: {ex.Message}");
+
+                        // Optional: Inform the user via a dialog that pinning isn't supported in their current environment
+                        var dialog = new ContentDialog
+                        {
+                            Title = "Pinning Failed",
+                            Content = "Could not pin the tile to Start. This often happens if the Start Menu is modified (e.g., ExplorerPatcher - blame MS for removing live tiles) or if the system shell is unresponsive.",
+                            CloseButtonText = "OK"
+                        };
+                        await dialog.ShowAsync();
                     }
                 }
             }
