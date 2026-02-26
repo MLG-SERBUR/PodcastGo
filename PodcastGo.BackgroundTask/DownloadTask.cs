@@ -6,6 +6,7 @@ using Windows.Networking.BackgroundTransfer;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq; // Required for JArray / JObject
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -79,7 +80,17 @@ namespace PodcastGo.BackgroundTask
                 return;
             }
 
-            dynamic podcasts = JsonConvert.DeserializeObject(content);
+            JArray podcasts = null;
+            try
+            {
+                podcasts = JArray.Parse(content);
+            }
+            catch (Exception ex)
+            {
+                await LogAsync($"{LogPrefix} Failed to parse podcasts: {ex.Message}");
+                return;
+            }
+
             if (podcasts == null)
             {
                 await LogAsync($"{LogPrefix} Failed to deserialize podcasts");
@@ -95,12 +106,11 @@ namespace PodcastGo.BackgroundTask
             await ManageDownloadsAsync(podcasts, folder);
         }
 
-        private async Task CleanUpEpisodesAsync(dynamic podcasts, StorageFolder folder)
+        private async Task CleanUpEpisodesAsync(JArray podcasts, StorageFolder folder)
         {
             bool changed = false;
             var validFileNames = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Protect actively downloading/queued files so we don't treat them as orphans
             var activeDownloads = await BackgroundDownloader.GetCurrentDownloadsAsync();
             foreach (var download in activeDownloads)
             {
@@ -110,34 +120,36 @@ namespace PodcastGo.BackgroundTask
                 }
             }
 
-            foreach (var podcast in podcasts)
+            foreach (JObject podcast in podcasts)
             {
                 bool foundOldestUnlistened = false;
-                int count = podcast.Episodes.Count;
+                JArray episodes = podcast["Episodes"] as JArray;
+                if (episodes == null) continue;
+                
+                int count = episodes.Count;
 
-                // Episodes are stored newest first. Iterate backwards to start with the oldest.
                 for (int i = count - 1; i >= 0; i--)
                 {
-                    var episode = podcast.Episodes[i];
-                    bool isListened = (bool?)episode.IsListened ?? false;
-                    string localPath = (string)episode.LocalFilePath;
-                    string title = (string)episode.Title ?? "Unknown Title";
+                    JObject episode = episodes[i] as JObject;
+                    if (episode == null) continue;
+
+                    bool isListened = (bool?)episode["IsListened"] ?? false;
+                    string localPath = (string)episode["LocalFilePath"];
+                    string title = (string)episode["Title"] ?? "Unknown Title";
 
                     if (isListened)
                     {
                         if (!string.IsNullOrEmpty(localPath))
                         {
                             await DeleteFileAsync(localPath, $"Listened episode - '{title}'");
-                            episode.LocalFilePath = null;
+                            episode["LocalFilePath"] = null;
                             changed = true;
                         }
                     }
                     else
                     {
-                        // Unlistened episodes
                         if (!foundOldestUnlistened)
                         {
-                            // This is the absolute oldest unlistened episode. It's allowed to be downloaded.
                             foundOldestUnlistened = true;
                             if (!string.IsNullOrEmpty(localPath))
                             {
@@ -146,11 +158,10 @@ namespace PodcastGo.BackgroundTask
                         }
                         else
                         {
-                            // This is a newer unlistened episode. Due to the previous bug, it shouldn't be downloaded!
                             if (!string.IsNullOrEmpty(localPath))
                             {
                                 await DeleteFileAsync(localPath, $"Erroneously downloaded newer episode - '{title}'");
-                                episode.LocalFilePath = null;
+                                episode["LocalFilePath"] = null;
                                 changed = true;
                             }
                         }
@@ -168,7 +179,6 @@ namespace PodcastGo.BackgroundTask
                 await LogAsync($"{LogPrefix} No JSON-tracked episodes needed cleanup");
             }
 
-            // Clean up orphaned .mp3 files not attached to our allowed list or active queue
             await CleanUpOrphanedFilesAsync(folder, validFileNames);
         }
 
@@ -220,20 +230,24 @@ namespace PodcastGo.BackgroundTask
             }
         }
 
-        private async Task ManageDownloadsAsync(dynamic podcasts, StorageFolder folder)
+        private async Task ManageDownloadsAsync(JArray podcasts, StorageFolder folder)
         {
-            // Build a list of allowed audio URLs (only the oldest unlistened episode per podcast)
             var allowedUrls = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var podcast in podcasts)
+            foreach (JObject podcast in podcasts)
             {
-                int count = podcast.Episodes.Count;
+                JArray episodes = podcast["Episodes"] as JArray;
+                if (episodes == null) continue;
+
+                int count = episodes.Count;
                 for (int i = count - 1; i >= 0; i--)
                 {
-                    var episode = podcast.Episodes[i];
-                    bool isListened = (bool?)episode.IsListened ?? false;
+                    JObject episode = episodes[i] as JObject;
+                    if (episode == null) continue;
+
+                    bool isListened = (bool?)episode["IsListened"] ?? false;
                     if (!isListened)
                     {
-                        string audioUrl = (string)episode.AudioUrl;
+                        string audioUrl = (string)episode["AudioUrl"];
                         if (!string.IsNullOrEmpty(audioUrl)) allowedUrls.Add(audioUrl);
                         break;
                     }
@@ -247,7 +261,6 @@ namespace PodcastGo.BackgroundTask
             {
                 string url = download.RequestedUri.ToString();
 
-                // If the previous bug queued up newer episodes or duplicates, explicitly terminate them
                 if (!allowedUrls.Contains(url))
                 {
                     await LogAsync($"{LogPrefix} Cancelling erroneously queued background download: {url}");
@@ -266,12 +279,10 @@ namespace PodcastGo.BackgroundTask
                     await LogAsync($"{LogPrefix} Attaching to existing permitted download: {url}");
                     await download.AttachAsync();
 
-                    // If we reach here, the download has completed. Match it back to JSON.
                     await HandleCompletedDownloadAsync(download, podcasts, folder);
                 }
                 catch (Exception ex)
                 {
-                    // The download failed (404, cancelled, etc.) 
                     await LogAsync($"{LogPrefix} Existing download failed or was cancelled: {ex.Message}");
                 }
             }
@@ -282,24 +293,28 @@ namespace PodcastGo.BackgroundTask
                 return;
             }
 
-            // Start new download for the oldest unlistened if no active downloads
             await StartNewDownloadAsync(podcasts, folder);
         }
 
-        private async Task HandleCompletedDownloadAsync(DownloadOperation download, dynamic podcasts, StorageFolder folder)
+        private async Task HandleCompletedDownloadAsync(DownloadOperation download, JArray podcasts, StorageFolder folder)
         {
             string audioUrl = download.RequestedUri.ToString();
             bool matched = false;
 
-            foreach (var podcast in podcasts)
+            foreach (JObject podcast in podcasts)
             {
-                foreach (var episode in podcast.Episodes)
+                JArray episodes = podcast["Episodes"] as JArray;
+                if (episodes == null) continue;
+
+                foreach (JObject episode in episodes)
                 {
-                    if ((string)episode.AudioUrl == audioUrl)
+                    if (episode == null) continue;
+
+                    if ((string)episode["AudioUrl"] == audioUrl)
                     {
-                        episode.LocalFilePath = download.ResultFile.Path;
+                        episode["LocalFilePath"] = download.ResultFile.Path;
                         matched = true;
-                        string title = (string)episode.Title ?? "Unknown Title";
+                        string title = (string)episode["Title"] ?? "Unknown Title";
                         await LogAsync($"{LogPrefix} Recovered completed download: '{title}'");
                         UpdateLiveTile($"Downloaded: {title}");
                         break;
@@ -323,18 +338,23 @@ namespace PodcastGo.BackgroundTask
             }
         }
 
-        private async Task StartNewDownloadAsync(dynamic podcasts, StorageFolder folder)
+        private async Task StartNewDownloadAsync(JArray podcasts, StorageFolder folder)
         {
-            foreach (var podcast in podcasts)
+            foreach (JObject podcast in podcasts)
             {
-                int count = podcast.Episodes.Count;
+                JArray episodes = podcast["Episodes"] as JArray;
+                if (episodes == null) continue;
+
+                int count = episodes.Count;
                 for (int i = count - 1; i >= 0; i--)
                 {
-                    var episode = podcast.Episodes[i];
-                    bool isListened = (bool?)episode.IsListened ?? false;
-                    string localPath = (string)episode.LocalFilePath;
-                    string audioUrl = (string)episode.AudioUrl;
-                    string title = (string)episode.Title ?? "Unknown Title";
+                    JObject episode = episodes[i] as JObject;
+                    if (episode == null) continue;
+
+                    bool isListened = (bool?)episode["IsListened"] ?? false;
+                    string localPath = (string)episode["LocalFilePath"];
+                    string audioUrl = (string)episode["AudioUrl"];
+                    string title = (string)episode["Title"] ?? "Unknown Title";
 
                     if (isListened || !string.IsNullOrEmpty(localPath))
                     {
@@ -354,14 +374,13 @@ namespace PodcastGo.BackgroundTask
 
                             await download.StartAsync();
 
-                            // Update JSON only after successfully completing
-                            episode.LocalFilePath = destinationFile.Path;
+                            episode["LocalFilePath"] = destinationFile.Path;
                             await SavePodcastsAsync(podcasts, folder);
 
                             UpdateLiveTile($"Downloaded: {title}");
                             await LogAsync($"{LogPrefix} Successfully downloaded episode: '{title}'");
 
-                            return; // Enforce only ONE unlistened episode downloaded globally at a time
+                            return; 
                         }
                         catch (Exception ex)
                         {
@@ -375,7 +394,7 @@ namespace PodcastGo.BackgroundTask
             await LogAsync($"{LogPrefix} No unlistened episodes to download");
         }
 
-        private async Task SavePodcastsAsync(dynamic podcasts, StorageFolder folder)
+        private async Task SavePodcastsAsync(JArray podcasts, StorageFolder folder)
         {
             try
             {
@@ -410,7 +429,10 @@ namespace PodcastGo.BackgroundTask
                 var notification = new TileNotification(tileXml);
                 TileUpdateManager.CreateTileUpdaterForApplication().Update(notification);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to update live tile: {ex.Message}");
+            }
         }
     }
 }
