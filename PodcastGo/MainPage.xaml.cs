@@ -78,7 +78,8 @@ namespace PodcastGo
             Uri uri = new Uri(url);
 
             // Resume logic
-            if (GlobalPlayer.Source is MediaSource oldSource && oldSource.Uri == uri)
+            if (GlobalPlayer.Source is Windows.Media.Playback.MediaPlaybackItem oldItem && 
+                oldItem.Source is MediaSource oldSource && oldSource.Uri == uri)
             {
                 if (GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackState != Windows.Media.Playback.MediaPlaybackState.Playing)
                 {
@@ -111,7 +112,15 @@ namespace PodcastGo
                 });
             };
 
-            GlobalPlayer.Source = mediaSource;
+            var playbackItem = new Windows.Media.Playback.MediaPlaybackItem(mediaSource);
+            var props = playbackItem.GetDisplayProperties();
+            props.Type = Windows.Media.MediaPlaybackType.Music;
+            props.MusicProperties.Title = episode.Title;
+            props.MusicProperties.Artist = podcast.Title;
+            props.MusicProperties.AlbumArtist = podcast.Title;
+            playbackItem.ApplyDisplayProperties(props);
+
+            GlobalPlayer.Source = playbackItem;
             GlobalPlayer.MediaPlayer.Play();
             episode.LastPlayedTime = DateTimeOffset.Now;
 
