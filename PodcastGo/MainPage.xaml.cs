@@ -112,6 +112,8 @@ namespace PodcastGo
                 });
             };
 
+            GlobalPlayer.MediaPlayer.AudioCategory = Windows.Media.Playback.MediaPlayerAudioCategory.Media;
+
             var playbackItem = new Windows.Media.Playback.MediaPlaybackItem(mediaSource);
             var props = playbackItem.GetDisplayProperties();
             props.Type = Windows.Media.MediaPlaybackType.Music;
@@ -124,6 +126,7 @@ namespace PodcastGo
             GlobalPlayer.MediaPlayer.Play();
             episode.LastPlayedTime = DateTimeOffset.Now;
 
+            // Ensure the event handler isn't registered multiple times if PlayEpisode is called repeatedly
             GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackStateChanged -= PlaybackSession_PlaybackStateChanged;
             GlobalPlayer.MediaPlayer.PlaybackSession.PlaybackStateChanged += PlaybackSession_PlaybackStateChanged;
 
