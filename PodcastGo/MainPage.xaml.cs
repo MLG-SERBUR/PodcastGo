@@ -286,5 +286,52 @@ namespace PodcastGo
         {
             ContentFrame.Navigate(typeof(DebugPage));
         }
+
+        private async void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool exported = await StorageService.ExportPodcastsAsync();
+            if (exported)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Export Complete",
+                    Content = "Podcast data exported successfully.",
+                    CloseButtonText = "OK"
+                };
+                await dialog.ShowAsync();
+            }
+        }
+
+        private async void ImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = await StorageService.ImportPodcastsAsync();
+            if (result.Cancelled) return;
+
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Import Failed",
+                    Content = result.Error,
+                    CloseButtonText = "OK"
+                };
+                await dialog.ShowAsync();
+                return;
+            }
+
+            var successDialog = new ContentDialog
+            {
+                Title = "Import Complete",
+                Content = $"{result.PodcastsAdded} podcast(s) added, {result.PodcastsMerged} existing podcast(s) merged.",
+                CloseButtonText = "OK"
+            };
+            await successDialog.ShowAsync();
+
+            // Refresh the podcast list if currently visible
+            if (ContentFrame.Content is PodcastListPage listPage)
+            {
+                ContentFrame.Navigate(typeof(PodcastListPage));
+            }
+        }
     }
 }

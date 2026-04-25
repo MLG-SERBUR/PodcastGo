@@ -49,6 +49,8 @@
             <AppBarButton x:Name="AddButton" Icon="Add" Label="Add Podcast" Click="AddButton_Click"/>
 
             <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="ExportButton" Icon="Save" Label="Export" Click="ExportButton_Click"/>
+                <AppBarButton x:Name="ImportButton" Icon="OpenFile" Label="Import" Click="ImportButton_Click"/>
                 <AppBarButton x:Name="DebugButton" Icon="Repair" Label="Debug" Click="DebugButton_Click"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>

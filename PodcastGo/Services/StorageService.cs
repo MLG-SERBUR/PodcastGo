@@ -109,5 +109,95 @@ namespace PodcastGo.Services
             }
             catch { }
         }
+
+        /// <summary>
+        /// Export all podcast data to a user-chosen .json file.
+        /// </summary>
+        public static async Task<bool> ExportPodcastsAsync()
+        {
+            var podcasts = await LoadPodcastsAsync();
+
+            var picker = new Windows.Storage.Pickers.FileSavePicker();
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            picker.FileTypeChoices.Add("JSON", new List<string> { ".json" });
+            picker.SuggestedFileName = "PodcastGo_Backup";
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null) return false;
+
+            var content = JsonConvert.SerializeObject(podcasts, Formatting.Indented);
+            await FileIO.WriteTextAsync(file, content);
+            return true;
+        }
+
+        /// <summary>
+        /// Import podcast data from a user-chosen .json file.
+        /// Merges by podcast ID — new podcasts are added, existing podcasts get new episodes merged.
+        /// Episode match key is AudioUrl. Existing episode state (Position, Notes, IsListened) is preserved.
+        /// </summary>
+        public static async Task<ImportResult> ImportPodcastsAsync()
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            picker.FileTypeFilter.Add(".json");
+
+            var file = await picker.PickSingleFileAsync();
+            if (file == null) return new ImportResult { Cancelled = true };
+
+            try
+            {
+                var content = await FileIO.ReadTextAsync(file);
+                var imported = JsonConvert.DeserializeObject<List<Podcast>>(content);
+                if (imported == null || imported.Count == 0)
+                    return new ImportResult { Error = "File contained no podcast data." };
+
+                var existing = await LoadPodcastsAsync();
+                int podcastsAdded = 0;
+                int podcastsMerged = 0;
+
+                foreach (var imp in imported)
+                {
+                    var match = existing.Find(p => p.Id == imp.Id);
+                    if (match == null)
+                    {
+                        // Brand new podcast
+                        existing.Add(imp);
+                        podcastsAdded++;
+                    }
+                    else
+                    {
+                        // Merge episodes into existing podcast
+                        podcastsMerged++;
+                        if (imp.Episodes == null) continue;
+
+                        foreach (var ep in imp.Episodes)
+                        {
+                            var existingEp = match.Episodes?.Find(e => e.AudioUrl == ep.AudioUrl);
+                            if (existingEp == null)
+                            {
+                                match.Episodes = match.Episodes ?? new List<Episode>();
+                                match.Episodes.Add(ep);
+                            }
+                            // Existing episodes keep their local state (position, notes, listened)
+                        }
+                    }
+                }
+
+                await SavePodcastsAsync(existing);
+                return new ImportResult { PodcastsAdded = podcastsAdded, PodcastsMerged = podcastsMerged };
+            }
+            catch (Exception ex)
+            {
+                return new ImportResult { Error = $"Import failed: {ex.Message}" };
+            }
+        }
+
+        public class ImportResult
+        {
+            public bool Cancelled { get; set; }
+            public string Error { get; set; }
+            public int PodcastsAdded { get; set; }
+            public int PodcastsMerged { get; set; }
+        }
     }
 }
