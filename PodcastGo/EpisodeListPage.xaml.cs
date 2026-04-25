@@ -22,7 +22,7 @@ namespace PodcastGo
 
         public bool IsShowingDetails => IsNarrow
             && DetailGrid.Visibility == Visibility.Visible
-            && MasterColumn.Width.Value == 0;
+            && MasterPane.Visibility == Visibility.Collapsed;
 
         public EpisodeListPage()
         {
@@ -87,13 +87,11 @@ namespace PodcastGo
         {
             if (IsNarrow)
             {
-                MasterColumn.Width = new GridLength(0);
-                DetailColumn.Width = new GridLength(1, GridUnitType.Star);
-            }
-            else
-            {
-                MasterColumn.Width = new GridLength(400);
-                DetailColumn.Width = new GridLength(1, GridUnitType.Star);
+                // Collapse master — does NOT reflow ListView to 0 width, preserving scroll
+                MasterPane.Visibility = Visibility.Collapsed;
+                // Let detail fill the entire width
+                Grid.SetColumn(DetailGrid, 0);
+                Grid.SetColumnSpan(DetailGrid, 2);
             }
             DetailGrid.Visibility = Visibility.Visible;
         }
@@ -122,9 +120,13 @@ namespace PodcastGo
         {
             if (!IsNarrow) return;
 
-            MasterColumn.Width = new GridLength(1, GridUnitType.Star);
-            DetailColumn.Width = new GridLength(0);
+            // Restore detail to its normal column
+            Grid.SetColumn(DetailGrid, 1);
+            Grid.SetColumnSpan(DetailGrid, 1);
             DetailGrid.Visibility = Visibility.Collapsed;
+
+            // Restore master — scroll position preserved since it was never reflowed
+            MasterPane.Visibility = Visibility.Visible;
         }
 
         private void UpdateMarkListenedButtonText()
