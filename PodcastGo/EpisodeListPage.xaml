@@ -44,39 +44,33 @@
 
         <!-- Left Pane: Episodes -->
         <Border x:Name="MasterPane" Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock x:Name="PodcastTitleTextBlock" FontSize="24" FontWeight="Bold" Margin="16" TextWrapping="Wrap"/>
-                
-                <StackPanel Grid.Row="1" Margin="16,0,16,12">
-                    <TextBox x:Name="SearchNotesBox" PlaceholderText="Search notes..." Margin="0,0,0,8" TextChanged="SearchNotesBox_TextChanged"/>
-                    <CheckBox x:Name="ShowAllCheckBox" Content="Show all episodes" Checked="ShowAll_Changed" Unchecked="ShowAll_Changed"/>
-                </StackPanel>
-
-                <ListView x:Name="EpisodeListView" Grid.Row="2" ItemClick="EpisodeListView_ItemClick" IsItemClickEnabled="True">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="models:Episode">
-                            <Grid Margin="0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="Listened" Visibility="{Binding IsListenedVisibility}" Foreground="Green" FontSize="12"/>
-                                </StackPanel>
-                                <SymbolIcon Grid.Column="1" Symbol="Download" Visibility="{Binding IsDownloadedVisibility}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{ThemeResource SystemControlForegroundAccentBrush}"/>
-                            </Grid>
-
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
+            <ListView x:Name="EpisodeListView" ItemClick="EpisodeListView_ItemClick" IsItemClickEnabled="True">
+                <ListView.Header>
+                    <StackPanel>
+                        <TextBlock x:Name="PodcastTitleTextBlock" FontSize="24" FontWeight="Bold" Margin="16" TextWrapping="Wrap"/>
+                        <StackPanel Margin="16,0,16,12">
+                            <TextBox x:Name="SearchNotesBox" PlaceholderText="Search notes..." Margin="0,0,0,8" TextChanged="SearchNotesBox_TextChanged"/>
+                            <CheckBox x:Name="ShowAllCheckBox" Content="Show all episodes" Checked="ShowAll_Changed" Unchecked="ShowAll_Changed"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ListView.Header>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Episode">
+                        <Grid Margin="0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="Listened" Visibility="{Binding IsListenedVisibility}" Foreground="Green" FontSize="12"/>
+                            </StackPanel>
+                            <SymbolIcon Grid.Column="1" Symbol="Download" Visibility="{Binding IsDownloadedVisibility}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{ThemeResource SystemControlForegroundAccentBrush}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Border>
 
         <!-- Right Pane: Details -->

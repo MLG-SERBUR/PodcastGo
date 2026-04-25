@@ -18,6 +18,12 @@ namespace PodcastGo
         private Episode _selectedEpisode;
         private bool _showAll = false;
 
+        private bool IsNarrow => RootGrid.ActualWidth < 800;
+
+        public bool IsShowingDetails => IsNarrow
+            && DetailGrid.Visibility == Visibility.Visible
+            && MasterColumn.Width.Value == 0;
+
         public EpisodeListPage()
         {
             this.InitializeComponent();
@@ -28,16 +34,16 @@ namespace PodcastGo
         {
             base.OnNavigatedTo(e);
             _podcast = e.Parameter as Podcast;
-            if (_podcast != null)
-            {
-                PodcastTitleTextBlock.Text = _podcast.Title;
-                RefreshEpisodeList();
+            if (_podcast == null) return;
 
-                // Auto-select playing episode if it belongs to this podcast
-                if (MainPage.Current.PlayingPodcast == _podcast && MainPage.Current.PlayingEpisode != null)
-                {
-                    ShowEpisodeDetails(MainPage.Current.PlayingEpisode);
-                }
+            PodcastTitleTextBlock.Text = _podcast.Title;
+            RefreshEpisodeList();
+
+            // Auto-select playing episode details (without scrolling the list)
+            if (MainPage.Current.PlayingPodcast == _podcast && MainPage.Current.PlayingEpisode != null)
+            {
+                PopulateDetail(MainPage.Current.PlayingEpisode);
+                ShowDetailPane();
             }
         }
 
@@ -62,73 +68,70 @@ namespace PodcastGo
             }
         }
 
-        private void EpisodeListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            _selectedEpisode = e.ClickedItem as Episode;
-            if (_selectedEpisode != null)
-            {
-                DetailTitleTextBlock.Text = _selectedEpisode.Title;
-                NotesTextBox.Text = _selectedEpisode.Notes ?? "";
-                UpdateMarkListenedButtonText();
-
-                MainPage.Current.PlayEpisode(_podcast, _selectedEpisode);
-
-                if (RootGrid.ActualWidth < 800)
-                {
-                    MasterColumn.Width = new GridLength(0);
-                    DetailColumn.Width = new GridLength(1, GridUnitType.Star);
-                    DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                }
-            }
-        }
-
-        public void ShowEpisodeDetails(Episode episode)
+        /// <summary>
+        /// Fill detail pane fields for an episode. Does NOT scroll or switch panes.
+        /// </summary>
+        private void PopulateDetail(Episode episode)
         {
             _selectedEpisode = episode;
-            DetailTitleTextBlock.Text = _selectedEpisode.Title;
-            NotesTextBox.Text = _selectedEpisode.Notes ?? "";
+            DetailTitleTextBlock.Text = episode.Title;
+            NotesTextBox.Text = episode.Notes ?? "";
             UpdateMarkListenedButtonText();
-            
-            // Highlight in list
-            EpisodeListView.SelectedItem = _selectedEpisode;
-            EpisodeListView.ScrollIntoView(_selectedEpisode);
+            EpisodeListView.SelectedItem = episode;
+        }
 
-            if (RootGrid.ActualWidth < 800)
+        /// <summary>
+        /// Show the detail pane (narrow: hide master; wide: just make detail visible).
+        /// </summary>
+        private void ShowDetailPane()
+        {
+            if (IsNarrow)
             {
                 MasterColumn.Width = new GridLength(0);
                 DetailColumn.Width = new GridLength(1, GridUnitType.Star);
-                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
             else
             {
                 MasterColumn.Width = new GridLength(400);
                 DetailColumn.Width = new GridLength(1, GridUnitType.Star);
-                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
+            DetailGrid.Visibility = Visibility.Visible;
         }
 
-        public bool IsShowingDetails => RootGrid.ActualWidth < 800 && DetailGrid.Visibility == Windows.UI.Xaml.Visibility.Visible && MasterColumn.Width.Value == 0;
+        private void EpisodeListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var episode = e.ClickedItem as Episode;
+            if (episode == null) return;
+
+            PopulateDetail(episode);
+            ShowDetailPane();
+            MainPage.Current.PlayEpisode(_podcast, episode);
+        }
+
+        /// <summary>
+        /// Called from MainPage when now-playing bar tapped for this podcast.
+        /// </summary>
+        public void ShowEpisodeDetails(Episode episode)
+        {
+            PopulateDetail(episode);
+            EpisodeListView.ScrollIntoView(episode);
+            ShowDetailPane();
+        }
 
         public void ShowMasterList()
         {
-            if (RootGrid.ActualWidth < 800)
-            {
-                MasterColumn.Width = new GridLength(1, GridUnitType.Star);
-                DetailColumn.Width = new GridLength(0);
-                DetailGrid.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            }
+            if (!IsNarrow) return;
+
+            MasterColumn.Width = new GridLength(1, GridUnitType.Star);
+            DetailColumn.Width = new GridLength(0);
+            DetailGrid.Visibility = Visibility.Collapsed;
         }
 
         private void UpdateMarkListenedButtonText()
         {
-            if (_selectedEpisode != null)
-            {
-                MarkListenedButton.Content = _selectedEpisode.IsListened ? "Unmark as listened" : "Mark as listened";
-            }
-            else
-            {
-                MarkListenedButton.Content = "Mark as listened";
-            }
+            MarkListenedButton.Content = _selectedEpisode?.IsListened == true
+                ? "Unmark as listened"
+                : "Mark as listened";
         }
 
         private async void MarkListened_Click(object sender, RoutedEventArgs e)

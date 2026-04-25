@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
@@ -33,6 +33,11 @@ namespace PodcastGo
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
         {
             UpdateBackButtonVisibility();
+
+            // CommandBar + title only on podcast list — reclaim vertical space elsewhere
+            AppCommandBar.Visibility = ContentFrame.Content is PodcastListPage
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void UpdateBackButtonVisibility()
@@ -223,7 +228,6 @@ namespace PodcastGo
             // Only navigate to PodcastListPage if the frame is completely empty
             if (ContentFrame.Content == null)
             {
-                NavListView.SelectedIndex = 0;
                 ContentFrame.Navigate(typeof(PodcastListPage));
             }
 
@@ -267,41 +271,20 @@ namespace PodcastGo
             }
         }
 
-        private void HamburgerButton_Click(object sender, RoutedEventArgs e)
-        {
-            RootSplitView.IsPaneOpen = !RootSplitView.IsPaneOpen;
-        }
-
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
             SaveEpisodePosition();
         }
 
-        private void NavListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            if (NavListView.SelectedItem is ListViewItem item)
-            {
-                string tag = item.Tag?.ToString();
-                switch (tag)
-                {
-                    case "podcasts":
-                        ContentFrame.Navigate(typeof(PodcastListPage));
-                        break;
-                    case "add":
-                        ContentFrame.Navigate(typeof(AddPodcastPage));
-                        break;
-                    case "debug":
-                        ContentFrame.Navigate(typeof(DebugPage));
-                        break;
-                }
+            ContentFrame.Navigate(typeof(AddPodcastPage));
+        }
 
-                // Close pane if in Overlay mode (Narrow view)
-                if (RootSplitView.DisplayMode == SplitViewDisplayMode.Overlay)
-                {
-                    RootSplitView.IsPaneOpen = false;
-                }
-            }
+        private void DebugButton_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(typeof(DebugPage));
         }
     }
 }
