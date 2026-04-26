@@ -28,6 +28,19 @@ namespace PodcastGo
             // Set up an actual periodic timer to execute the saves every 15 seconds
             _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
             _saveTimer.Tick += (s, e) => SaveEpisodePosition();
+
+            Windows.Storage.ApplicationData.Current.DataChanged += ApplicationData_DataChanged;
+        }
+
+        private async void ApplicationData_DataChanged(Windows.Storage.ApplicationData sender, object args)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                if (ContentFrame.Content is PodcastListPage)
+                {
+                    ContentFrame.Navigate(typeof(PodcastListPage));
+                }
+            });
         }
 
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
