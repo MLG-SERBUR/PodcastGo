@@ -49,7 +49,7 @@
                     <StackPanel>
                         <TextBlock x:Name="PodcastTitleTextBlock" FontSize="24" FontWeight="Bold" Margin="16" TextWrapping="Wrap"/>
                         <StackPanel Margin="16,0,16,12">
-                            <TextBox x:Name="SearchNotesBox" PlaceholderText="Search notes..." Margin="0,0,0,8" TextChanged="SearchNotesBox_TextChanged"/>
+                            <TextBox x:Name="SearchBox" PlaceholderText="Search notes and episodes" Margin="0,0,0,8" TextChanged="SearchBox_TextChanged"/>
                             <CheckBox x:Name="ShowAllCheckBox" Content="Show all episodes" Checked="ShowAll_Changed" Unchecked="ShowAll_Changed"/>
                         </StackPanel>
                     </StackPanel>

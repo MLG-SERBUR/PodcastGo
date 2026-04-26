@@ -43,7 +43,14 @@ namespace PodcastGo
             if (MainPage.Current.PlayingPodcast == _podcast && MainPage.Current.PlayingEpisode != null)
             {
                 PopulateDetail(MainPage.Current.PlayingEpisode);
-                ShowDetailPane();
+                
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = (s, args) =>
+                {
+                    this.Loaded -= loadedHandler;
+                    ShowDetailPane();
+                };
+                this.Loaded += loadedHandler;
             }
         }
 
@@ -59,7 +66,8 @@ namespace PodcastGo
             {
                 bool matchesFilter = _showAll || ep.IsListened || ep == nextUnlistened;
                 bool matchesSearch = string.IsNullOrWhiteSpace(searchQuery) ||
-                                     (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0);
+                                     (!string.IsNullOrEmpty(ep.Notes) && ep.Notes.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                                     (!string.IsNullOrEmpty(ep.Title) && ep.Title.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0);
 
                 if (matchesFilter && matchesSearch)
                 {
@@ -143,7 +151,7 @@ namespace PodcastGo
                 _selectedEpisode.IsListened = !_selectedEpisode.IsListened;
                 UpdateMarkListenedButtonText();
                 await SaveChangesAsync();
-                RefreshEpisodeList(SearchNotesBox.Text);
+                RefreshEpisodeList(SearchBox.Text);
             }
         }
 
@@ -160,7 +168,7 @@ namespace PodcastGo
                         allEpisodes[i].IsListened = true;
                     }
                     await SaveChangesAsync();
-                    RefreshEpisodeList(SearchNotesBox.Text);
+                    RefreshEpisodeList(SearchBox.Text);
                 }
             }
         }
@@ -174,9 +182,9 @@ namespace PodcastGo
             }
         }
 
-        private void SearchNotesBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            RefreshEpisodeList(SearchNotesBox.Text);
+            RefreshEpisodeList(SearchBox.Text);
         }
 
         private void ShowAll_Changed(object sender, RoutedEventArgs e)
@@ -184,7 +192,7 @@ namespace PodcastGo
             if (sender is CheckBox cb)
             {
                 _showAll = cb.IsChecked ?? false;
-                RefreshEpisodeList(SearchNotesBox.Text);
+                RefreshEpisodeList(SearchBox.Text);
             }
         }
 
